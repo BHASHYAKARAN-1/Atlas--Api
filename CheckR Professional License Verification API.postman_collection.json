@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "df1fd70b-e2cf-4560-a207-f26dad81c22e",
+    "name": "CheckR Professional License Verification API",
+    "description": "API collection for CheckR PLV integration with AtlasVerifyNow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51927098",
+    "_collection_link": "https://go.postman.co/collection/51927098-df1fd70b-e2cf-4560-a207-f26dad81c22e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Get Certification Organizations",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "live"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.get_cert_orgs\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"keywords\": [\"nurse\", \"medical\"],\n    \"states\": [\"CA\", \"NY\", \"TX\"]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Organization Properties",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "live"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.get_cert_org_properties\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"cert_orgs\": [\"7912FDDE-74EA-405D-96E3-85983E7EB56D\", \"67890\"]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Submit Verification Order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "live"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.order\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"reference_id\": \"REF-{{$randomInt}}\",\n    \"candidate_id\": \"CAND-{{$randomInt}}\",\n    \"customer_id\": \"CUST-{{$randomInt}}\",\n    \"first_name\": \"Vincent\",\n    \"middle_name\": \"Kirse\",\n    \"last_name\": \"Joseph\",\n    \"business_name\": \"\",\n    \"certification_org_id\": \"639E50A7-7429-44EF-9036-8FE7FD84AA34\",\n    \"input_data\": {\n      \"licenseNumber\": \"D-5116\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reorder Verification",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "live"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.reorder\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"reference_id\": \"cert_d41c794c71bb2b90a714bba2\",\n    \"candidate_id\": \"6bf49ec3d2c6e91ffb25d96e\",\n    \"customer_id\": \"bb40d1cb5df842a9aa0cb9aa\",\n    \"first_name\": \"Vincent\",\n    \"middle_name\": \"Kirse\",\n    \"last_name\": \"Joseph\",\n    \"business_name\": \"\",\n    \"certification_org_id\": \"639E50A7-7429-44EF-9036-8FE7FD84AA34\",\n    \"input_data\": {\n      \"licenseNumber\": \"D-5116\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Subscribe to Continuous Monitoring",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "live"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.continuous.subscribe\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"candidate_id\": \"CAND-12345\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Unsubscribe from Continuous Monitoring",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "live"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.continuous.unsubscribe\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"candidate_id\": \"CAND-12345\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sandbox - Get Certification Organizations",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code should not be 500\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(500);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 401\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response status code should not be 404\", function () {\r",
+              "    pm.expect(pm.response.code).to.not.equal(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 3000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Checkr-Environment",
+            "value": "sandbox"
+          },
+          {
+            "key": "X-Checkr-Signature",
+            "value": "{{hmac_signature}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"{{$guid}}\",\n  \"event_name\": \"plv.get_cert_orgs\",\n  \"event_utc_time\": \"{{$isoTimestamp}}\",\n  \"event_payload\": {\n    \"keywords\": [\"nurse\", \"medical\"],\n    \"states\": [\"CA\", \"NY\", \"TX\"]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/events",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "events"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          "// HMAC Signature Generation",
+          "const CryptoJS = require('crypto-js');",
+          "",
+          "// Get API key from environment",
+          "const apiKey = pm.environment.get('CHECKR_API_KEY') || pm.variables.get('apiKey');",
+          "",
+          "// Get request body",
+          "const requestBody = pm.request.body.raw;",
+          "",
+          "// Create HMAC signature",
+          "const message = apiKey + requestBody;",
+          "const signature = CryptoJS.HmacSHA256(message, apiKey).toString();",
+          "",
+          "// Set signature in variable",
+          "pm.variables.set('hmac_signature', signature);",
+          "",
+          "console.log('Generated HMAC signature:', signature);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl1",
+      "value": "https://api.atlascertified.io"
+    },
+    {
+      "key": "sandboxUrl",
+      "value": "http://checkrsandbox.atlascertified.io"
+    },
+    {
+      "key": "apiKey",
+      "value": "{{CHECKR_API_KEY}}"
+    },
+    {
+      "key": "hmac_signature",
+      "value": ""
+    },
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}

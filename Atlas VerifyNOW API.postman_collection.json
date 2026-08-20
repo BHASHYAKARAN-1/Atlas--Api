@@ -1,0 +1,4398 @@
+{
+  "info": {
+    "_postman_id": "2d39abfc-aacf-47ea-90bc-02b99936a67a",
+    "name": "Atlas VerifyNOW API",
+    "description": "RESTful services for credential verification via the Atlas API ecosystem.\r\n\r\n## Overview ##\r\nA Certifying Organization is the official administer (either web site, data repository, or flat file), whether a governmental entity for public protection purposes or professional association, of licenses and certifications to individuals or organizations that require the demonstration of a certain level of knowledge or ability.\r\n\r\nContact us at atlassupport@symplr.com to get setup with an API Key on our API Sandbox.\r\n\r\nBelow is a summary overview of the API.  \r\n\r\n<b>A detailed API Workflow document is available at <a href='DataWorkFlows.pdf'>DETAILED API DOCUMENTATION</a></b>\r\n\r\n<b>A detailed API Discover License document is available at <a href='discoverLicenseDocs.pdf'>DETAILED DISCOVER LICENSE DOCUMENTATION</a></b>\r\n\r\n## Process ##\r\nThe VerifyNOW API provides for a verification to be submitted to a Certifying Organizations and the results of the verification provided via a Webhook.  \r\n\r\nWhen a verification is sent using verificationSubmit the parameters are evaluated to ensure they are correct.  \r\n\r\ncertOrgFields POST;\r\n\r\n{ api_key : 'client api key' , CertOrgID : '776AD35B-4141-43E6-A550-F9078B7307B5' }\r\n\r\ncertOrgFields RESULT;\r\n\r\n{ Name: 'LicenseNumber',  hasOptions: false, options: Count = 0 }\r\n\r\nverificationSubmit POST;\r\n\r\n{\r\n  ClientRequestID: 'client unique id',\r\n  FirstName: 'Alison',\r\n  LastName: 'Alter',\r\n  CompanyName: '',\r\n  Email: '',\r\n  CertOrgID: '776AD35B-4141-43E6-A550-F9078B7307B5',\r\n  api_key: 'client api key',\r\n  InputList: [ { FieldName: 'LicenseNumber', FieldValue: '831269' } ]\r\n}\r\n\r\nverificationSubmit RESULT;\r\n\r\n{ ClientRequestID: 'client unique id',  RequestID: 176887, Responsemsg: '' }\r\n\r\nIf they are the API immediately return the requestID created in our system and the verification is submitted to the processing engine.  Depending on load and the specific Certifying Org’s web site, the requestID will be processed anywhere form 10 seconds to 2 minutes.  \r\n\r\nAfter the verification is processed by our engine, any webhook that has been using addWebHook is called with the results of the engine process.\r\n\r\n## CertOrg Discovery ##\r\nThe <discoverLicense> endpoints are designed to provide a search capability for those certification organizations that provide a full data listing of licenses.  This allows for smoothing the On Boarding process by determining a license number and certification organization prior to submitting an actual real time verification.\r\n\r\nUse discoverLicenseData to determine what licenses are available to search for a State.  Use the Keyword filter to search for specific certifications like Nurse or Physician.\r\n\r\nUse discoverLicense to search for a license based on existing data you have in order to verify if the license number exists or to find a license number based on partial information.\r\n\r\nUse discoverLicenseText to do a search for a license based on a single text input string, like you might use in a “type ahead” style user interface.\r\n\r\nThere are other ‘discovery’ end points which allow the determination of the specific Certifying Org for a license verification.  If, for example, the Certifying Org for New York Physicians is needed, there a several endpoints which provide for the retrieval of filters and allow for the determination of which Certifying Org and input fields are needed for a specific verification.  These endpoints can be used to create client UIs that allow for the determination of the correct Certifying Org.\r\n\r\nThere are two ways to go about discovery of Certifying Orgs.  By Keywords or By State.\r\n\r\nYou can view the keywords by calling certOrgKeywords.  For the keywords to be used, let’s say “New York” (33) and “Physician” (633), package those up to certOrgbyKeywords and it will return the provider(s) for those keywords.\r\n\r\nYou can view the available States by calling certOrgStates.  For the State to be used, send the State_ID to certOrgsbyState and it will return the provider(s) for that State.\r\n\r\nOnce the desired Certification Org is established, pass the certOrgID to certOrgFields to get the required input fields for that provider.\r\n\r\n## 3rd Parties ##\r\nVerifications requires a dependency on 3rd party resources which are outside the control of Atlas.  Therefore, processing times can significantly vary based on the 3rd party infrastructure.  \r\n\r\n## WebHooks Notes ##\r\n A verification is considered processed if we receive a 200 status back from the client WebHook endpoint. \r\n\r\n Items are automatically marked as unprocessed two ways: 1. For all new verification requests.  2. For subsequent requests of the same verification, where the status changes, i.e. going from unverified to verified or vice versa. \r\n\r\n Each hook url has its own processed flag, so if 'url A' returns 200, it will be marked as processed, but if 'url B' returns 500, it will remain unprocessed.  All unprocessed items are periodically automatically retried. \r\n\r\n The web hooks work by distinguishing when their is a change in a verification. That change doesn't matter whether it is a standard 30 day retry, or a manual retry. If the verification changes status, such as goes from Active to Expired, then the webhook is triggered.  If a verification is re-verified, a webhook will only be called if there is a change in status for the verification.  To send all webhooks in the sandbox, request that the SendAll flag be set. \r\n\r\n “apiKey” that is submitted during the addWebHook is the key that will be returned to the webhook in the header as “apiKey”.\r\n\r\n## Verification Status Descriptions ##\r\n\r\nPostive values are additive, meaning a status of 9 would be Active and Excluded.\r\n\r\nVERIFICATION PROCESSED\r\n\r\n1\tActive. This item is considered valid by the issuing provider, or for an Exclusion is Not Excluded.\r\n\r\n2\tExpired. This item is considered expired by the issuing provider, or for an Exclusion is Excluded or has a potential Exclusions.\r\n\r\n4\tRevoked. This item was valid at one time, but has been revoked by the issuing provider.\r\n\r\n8\tExclusion. This item is an Exclusion verification.\r\n\r\n16\tInvalid. The issuing provider was not able to find this item by the data provided\r\n\r\n\r\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51927098",
+    "_collection_link": "https://go.postman.co/collection/51927098-2d39abfc-aacf-47ea-90bc-02b99936a67a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "certOrgStates",
+          "item": [
+            {
+              "name": "List of all States for USA State License that have a Certifying Orgs.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code is 200\", function () {\r",
+                      "    pm.expect(pm.response.code).to.equal(200);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response is an array with at least one element\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Each object in the array has the required fields: name and stateID\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "    \r",
+                      "    responseData.forEach(function(item) {\r",
+                      "        pm.expect(item).to.have.property('name').that.is.a('string');\r",
+                      "        pm.expect(item).to.have.property('stateID').that.is.a('number');\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"StateID is a non-negative integer\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "    responseData.forEach(item => {\r",
+                      "        pm.expect(item.stateID).to.be.a('number').and.to.be.at.least(0);\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Each object in the array has a non-empty name field\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "    \r",
+                      "    responseData.forEach(function(item) {\r",
+                      "        pm.expect(item).to.have.property('name').that.is.a('string').and.to.have.lengthOf.at.least(1, \"Name field should not be empty\");\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response does not contain any duplicate stateID values\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array');\r",
+                      "    \r",
+                      "    const stateIDs = responseData.map(item => item.stateID);\r",
+                      "    const uniqueStateIDs = new Set(stateIDs);\r",
+                      "    \r",
+                      "    pm.expect(uniqueStateIDs.size).to.equal(stateIDs.length, \"There are duplicate stateID values in the response\");\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}}\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/certOrgStates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certOrgStates"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": {{API_KEY}}\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgStates",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgStates"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"stateID\": 4443\n  },\n  {\n    \"name\": \"string\",\n    \"stateID\": 1218\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": {{API_KEY}}\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgStates",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgStates"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "certOrgsbyState",
+          "item": [
+            {
+              "name": "Get a List of all Certifying Orgs for a state.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code is 200\", function () {\r",
+                      "    pm.expect(pm.response.code).to.equal(200);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response has the required fields\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "\r",
+                      "    responseData.forEach(item => {\r",
+                      "        pm.expect(item).to.be.an('object');\r",
+                      "        pm.expect(item).to.have.all.keys('name', 'stateID', 'certOrgID', 'isHealthy');\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Validate that stateID is a non-negative integer\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "    responseData.forEach(item => {\r",
+                      "        pm.expect(item.stateID).to.be.a('number').that.is.at.least(0);\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Validate that isHealthy is a boolean value\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+                      "    responseData.forEach(function(item) {\r",
+                      "        pm.expect(item.isHealthy).to.be.a('boolean');\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"stateID\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/certOrgsbyState",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certOrgsbyState"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\":{{API_KEY}},\n  \"stateID\": 7039\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgsbyState",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgsbyState"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"stateID\": 7830,\n    \"certOrgID\": \"string\",\n    \"isHealthy\": true\n  },\n  {\n    \"name\": \"string\",\n    \"stateID\": 644,\n    \"certOrgID\": \"string\",\n    \"isHealthy\": false\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"stateID\": 7039\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgsbyState",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgsbyState"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "certOrgKeywords",
+          "item": [
+            {
+              "name": "Get a List of all Certifying Org keywords.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response is an array\", function () {\r",
+                      "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Each item has required fields with correct types\", function () {\r",
+                      "    const data = pm.response.json();\r",
+                      "\r",
+                      "    data.forEach(item => {\r",
+                      "        pm.expect(item).to.have.property('id');\r",
+                      "        pm.expect(item.id).to.be.a('number');\r",
+                      "\r",
+                      "        pm.expect(item).to.have.property('name');\r",
+                      "        pm.expect(item.name).to.be.a('string');\r",
+                      "\r",
+                      "        pm.expect(item).to.have.property('iconURL');\r",
+                      "        pm.expect(item.iconURL).to.be.a('string');\r",
+                      "\r",
+                      "        pm.expect(item).to.have.property('color');\r",
+                      "        pm.expect(item.color).to.be.a('number');\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"iconURL is either FontAwesome class or URL\", function () {\r",
+                      "    const data = pm.response.json();\r",
+                      "\r",
+                      "    data.forEach(item => {\r",
+                      "        pm.expect(\r",
+                      "            item.iconURL.startsWith('fas fa-') ||\r",
+                      "            item.iconURL.startsWith('https://fontawesome.com/')\r",
+                      "        ).to.be.true;\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"ID values are unique\", function () {\r",
+                      "    const data = pm.response.json();\r",
+                      "    const ids = data.map(item => item.id);\r",
+                      "    const uniqueIds = new Set(ids);\r",
+                      "\r",
+                      "    pm.expect(uniqueIds.size).to.eql(ids.length);\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchFilter\": \"Ari\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/certOrgKeywords",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certOrgKeywords"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchFilter\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgKeywords",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgKeywords"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"id\": 294,\n    \"name\": \"string\",\n    \"iconURL\": \"string\",\n    \"color\": 55\n  },\n  {\n    \"id\": 9863,\n    \"name\": \"string\",\n    \"iconURL\": \"string\",\n    \"color\": 7954\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchFilter\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgKeywords",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgKeywords"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "certOrgsbyKeywords",
+          "item": [
+            {
+              "name": "Get a List of all Certifying Orgs that match a list of keywords.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response is an array\", function () {\r",
+                      "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchFilter\": \"\",\n  \"keywords\": [\n    4\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/certOrgsbyKeywords",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certOrgsbyKeywords"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"searchFilter\": \"string\",\n  \"keywords\": [\n    7008,\n    9584\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgsbyKeywords",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgsbyKeywords"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"stateID\": 7830,\n    \"certOrgID\": \"string\",\n    \"isHealthy\": true\n  },\n  {\n    \"name\": \"string\",\n    \"stateID\": 644,\n    \"certOrgID\": \"string\",\n    \"isHealthy\": false\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"searchFilter\": \"string\",\n  \"keywords\": [\n    7008,\n    9584\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgsbyKeywords",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgsbyKeywords"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "certOrgFields",
+          "item": [
+            {
+              "name": "List of all input fields for a Certifying Org.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Validate exact order and values\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(response[0].name).to.eql(\"LicenseNumber\");\r",
+                      "    pm.expect(response[0].hasOptions).to.eql(false);\r",
+                      "\r",
+                      "    pm.expect(response[1].name).to.eql(\"NPI\");\r",
+                      "    pm.expect(response[1].hasOptions).to.eql(false);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"certOrgID\": \"1bed2e5d-35c4-4e7a-8539-e4db8ea69822\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/certOrgFields",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certOrgFields"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"certOrgID\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgFields",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgFields"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"options\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      },\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      }\n    ],\n    \"hasOptions\": true\n  },\n  {\n    \"name\": \"string\",\n    \"options\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      },\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      }\n    ],\n    \"hasOptions\": true\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"certOrgID\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/certOrgFields",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "certOrgFields"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationSubmit",
+          "item": [
+            {
+              "name": "Submit a verification",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Validate response structure and data types\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    // Check required properties\r",
+                      "    pm.expect(response).to.have.property(\"requestID\");\r",
+                      "    pm.expect(response).to.have.property(\"clientRequestID\");\r",
+                      "    pm.expect(response).to.have.property(\"responsemsg\");\r",
+                      "\r",
+                      "    // Validate data types\r",
+                      "    pm.expect(response.requestID).to.be.a(\"number\");\r",
+                      "    pm.expect(response.clientRequestID).to.be.a(\"string\");\r",
+                      "    pm.expect(response.responsemsg).to.be.a(\"string\");\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"certOrgID\": \"53974337-0ec3-4dce-9965-16a3ef48588f\",\n  \"companyName\": \"A Child's Place At The Ranches, L.L.C.\",\n  \"inputList\": [\n    {\n      \"fieldName\": \"LicenseNumber\",\n      \"fieldValue\": \"CDC-11818\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationSubmit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationSubmit"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"certOrgID\": \"string\",\n  \"uniqueId\": \"string\",\n  \"archive\": \"string\",\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\",\n  \"companyName\": \"string\",\n  \"email\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"zip\": \"string\",\n  \"clientRequestId\": \"string\",\n  \"inputList\": [\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    },\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    }\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationSubmit",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationSubmit"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"requestID\": 2804,\n  \"clientRequestID\": \"string\",\n  \"responsemsg\": \"string\"\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"certOrgID\": \"string\",\n  \"uniqueId\": \"string\",\n  \"archive\": \"string\",\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\",\n  \"companyName\": \"string\",\n  \"email\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"zip\": \"string\",\n  \"clientRequestId\": \"string\",\n  \"inputList\": [\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    },\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    }\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationSubmit",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationSubmit"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationResponse",
+          "item": [
+            {
+              "name": "Get the verification update after engine processing.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"License is active and not expired\", function () {\r",
+                      "    const json = pm.response.json();\r",
+                      "    pm.expect(json.certification_name).to.eql(\"Child Care Center\");\r",
+                      "    \r",
+                      "    const expDate = new Date(json.expiration_date);\r",
+                      "    pm.expect(expDate).to.be.above(new Date());\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Required fields are present\", function () {\r",
+                      "    const json = pm.response.json();\r",
+                      "    pm.expect(json).to.have.all.keys(\r",
+                      "        \"success\", \"request_ID\", \"response_msg\", \"status\",\r",
+                      "        \"last_activity\", \"issued_to\", \"expiration_date\",\r",
+                      "        \"certification_name\", \"provider\", \"status_Notes\",\r",
+                      "        \"client_Request_ID\", \"screenshot\"\r",
+                      "    );\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Issued to correct facility\", function () {\r",
+                      "    const json = pm.response.json();\r",
+                      "    pm.expect(json.issued_to).to.eql(\"A Child's Place At The Ranches, L.L.C.\");\r",
+                      "    pm.expect(json.provider).to.eql(\"Arizona: Care Providers\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response message contains license number\", function () {\r",
+                      "    const json = pm.response.json();\r",
+                      "    pm.expect(json.response_msg).to.include(\"CDC-11818\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Screenshot is present and base64 encoded\", function () {\r",
+                      "    const json = pm.response.json();\r",
+                      "    pm.expect(json.screenshot).to.be.a(\"string\");\r",
+                      "    pm.expect(json.screenshot).to.match(/^data:image\\/(jpg|jpeg|png);base64,/);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 265110\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationResponse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationResponse"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationResponse",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationResponse"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"success\": true,\n    \"request_ID\": 7498,\n    \"response_msg\": \"string\",\n    \"status\": \"string\",\n    \"last_activity\": \"string\",\n    \"issued_to\": \"string\",\n    \"expiration_date\": \"string\",\n    \"certification_name\": \"string\",\n    \"provider\": \"string\",\n    \"status_Notes\": \"string\",\n    \"client_Request_ID\": \"string\",\n    \"screenshot\": \"string\"\n  },\n  {\n    \"success\": true,\n    \"request_ID\": 2634,\n    \"response_msg\": \"string\",\n    \"status\": \"string\",\n    \"last_activity\": \"string\",\n    \"issued_to\": \"string\",\n    \"expiration_date\": \"string\",\n    \"certification_name\": \"string\",\n    \"provider\": \"string\",\n    \"status_Notes\": \"string\",\n    \"client_Request_ID\": \"string\",\n    \"screenshot\": \"string\"\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationResponse",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationResponse"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationDelete",
+          "item": [
+            {
+              "name": "Delete a verification",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 273931\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationDelete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationDelete"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationDelete",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationDelete"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "true"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationDelete",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationDelete"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationArchive",
+          "item": [
+            {
+              "name": "Archives a verification.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 273938\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationArchive",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationArchive"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationArchive",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationArchive"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "true"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationArchive",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationArchive"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationUpdate",
+          "item": [
+            {
+              "name": "Update a verification.  Only verifications that have failed may be changed.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should  be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 272597,\n  \"inputList\": [\n  ],\n  \"firstName\": \"Wendy\",\n  \"middleName\": \"Eileen\",\n  \"lastName\": \"Abbott\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationUpdate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationUpdate"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 4724,\n  \"inputList\": [\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    },\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    }\n  ],\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\",\n  \"companyName\": \"string\",\n  \"eMail\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"zip\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationUpdate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationUpdate"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "true"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 4724,\n  \"inputList\": [\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    },\n    {\n      \"fieldName\": \"string\",\n      \"fieldValue\": \"string\"\n    }\n  ],\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\",\n  \"companyName\": \"string\",\n  \"eMail\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"zip\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationUpdate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationUpdate"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationData",
+          "item": [
+            {
+              "name": "Get extended data for a verification.  For the VerificationAttribute property array, multiple certifications can be returned.  Each distinct certification will have a unique Sequence number.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 274753\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationData",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationData"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationData",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationData"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"request_ID\": 2711,\n  \"response_msg\": \"string\",\n  \"status\": \"string\",\n  \"create_date\": \"string\",\n  \"last_activity\": \"string\",\n  \"last_success\": \"string\",\n  \"last_failure\": \"string\",\n  \"provider\": \"string\",\n  \"status_Notes\": \"string\",\n  \"client_Request_ID\": \"string\",\n  \"screenshot\": \"string\",\n  \"verification_data\": [\n    {\n      \"name\": \"string\",\n      \"friendly_Name\": \"string\",\n      \"data_Value\": \"string\",\n      \"sequence\": 5988\n    },\n    {\n      \"name\": \"string\",\n      \"friendly_Name\": \"string\",\n      \"data_Value\": \"string\",\n      \"sequence\": 3423\n    }\n  ]\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 8399\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationData",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationData"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "discoverLicense",
+          "item": [
+            {
+              "name": "The discovery endpoint to get License information.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"licenseNumber\": \"010164\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/discoverLicense",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "discoverLicense"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"licenseNumber\": \"string\",\n  \"lastName\": \"string\",\n  \"companyName\": \"string\",\n  \"certOrgStateAbbr\": \"string\",\n  \"npi\": \"string\",\n  \"licenseTypeKeyword\": \"string\",\n  \"partialOnly\": true,\n  \"maxReturn\": \"string\",\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"eMail\": \"string\",\n  \"phone\": \"string\",\n  \"streetName\": \"string\",\n  \"streetNumber\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"zip\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/discoverLicense",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "discoverLicense"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"tooMany\": true,\n  \"message\": \"string\",\n  \"license_Data\": [\n    {\n      \"entity\": \"string\",\n      \"certOrgId\": \"string\",\n      \"licenseNumber\": \"string\",\n      \"licenseType\": \"string\",\n      \"issuedTo\": \"string\",\n      \"certificationTitle\": \"string\",\n      \"firstName\": \"string\",\n      \"middleName\": \"string\",\n      \"lastName\": \"string\",\n      \"companyName\": \"string\",\n      \"eMail\": \"string\",\n      \"phone\": \"string\",\n      \"address\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"country\": \"string\",\n      \"zip\": \"string\"\n    },\n    {\n      \"entity\": \"string\",\n      \"certOrgId\": \"string\",\n      \"licenseNumber\": \"string\",\n      \"licenseType\": \"string\",\n      \"issuedTo\": \"string\",\n      \"certificationTitle\": \"string\",\n      \"firstName\": \"string\",\n      \"middleName\": \"string\",\n      \"lastName\": \"string\",\n      \"companyName\": \"string\",\n      \"eMail\": \"string\",\n      \"phone\": \"string\",\n      \"address\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"country\": \"string\",\n      \"zip\": \"string\"\n    }\n  ]\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"licenseNumber\": \"string\",\n  \"lastName\": \"string\",\n  \"companyName\": \"string\",\n  \"certOrgStateAbbr\": \"string\",\n  \"npi\": \"string\",\n  \"licenseTypeKeyword\": \"string\",\n  \"partialOnly\": true,\n  \"maxReturn\": \"string\",\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"eMail\": \"string\",\n  \"phone\": \"string\",\n  \"streetName\": \"string\",\n  \"streetNumber\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"zip\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/discoverLicense",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "discoverLicense"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "discoverLicenseByText",
+          "item": [
+            {
+              "name": "The discovery endpoint to get License information from a single search text, like a type ahead input.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Validate license API response structure\", function () {\r",
+                      "    const res = pm.response.json();\r",
+                      "\r",
+                      "    // Top-level validations\r",
+                      "    pm.expect(res).to.have.property(\"success\");\r",
+                      "    pm.expect(res).to.have.property(\"tooMany\");\r",
+                      "    pm.expect(res).to.have.property(\"message\");\r",
+                      "    pm.expect(res).to.have.property(\"license_Data\");\r",
+                      "\r",
+                      "    pm.expect(res.success).to.be.a(\"boolean\");\r",
+                      "    pm.expect(res.tooMany).to.be.a(\"boolean\");\r",
+                      "    pm.expect(res.license_Data).to.be.an(\"array\");\r",
+                      "\r",
+                      "    // Ensure license data is not empty\r",
+                      "    pm.expect(res.license_Data.length).to.be.above(0);\r",
+                      "\r",
+                      "    // Validate each license object\r",
+                      "    res.license_Data.forEach((item, index) => {\r",
+                      "        pm.expect(item, `Item ${index} missing entity`).to.have.property(\"entity\");\r",
+                      "        pm.expect(item).to.have.property(\"certOrgId\");\r",
+                      "        pm.expect(item).to.have.property(\"licenseNumber\");\r",
+                      "        pm.expect(item).to.have.property(\"issuedTo\");\r",
+                      "        pm.expect(item).to.have.property(\"city\");\r",
+                      "        pm.expect(item).to.have.property(\"state\");\r",
+                      "        pm.expect(item).to.have.property(\"zip\");\r",
+                      "\r",
+                      "        pm.expect(item.entity).to.be.a(\"string\");\r",
+                      "        pm.expect(item.certOrgId).to.be.a(\"string\");\r",
+                      "        pm.expect(item.licenseNumber).to.be.a(\"string\");\r",
+                      "        pm.expect(item.issuedTo).to.be.a(\"string\");\r",
+                      "        pm.expect(item.city).to.be.a(\"string\");\r",
+                      "        pm.expect(item.state).to.be.a(\"string\");\r",
+                      "        pm.expect(item.zip).to.be.a(\"string\");\r",
+                      "\r",
+                      "        // Nullable fields check (should exist even if null)\r",
+                      "        [\"eMail\", \"phone\", \"address\", \"country\"].forEach(field => {\r",
+                      "            pm.expect(item).to.have.property(field);\r",
+                      "        });\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchText\": \"smith\",\n  \"maxReturn\": \"10\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/discoverLicenseByText",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "discoverLicenseByText"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"searchText\": \"string\",\n  \"maxReturn\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/discoverLicenseByText",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "discoverLicenseByText"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"tooMany\": true,\n  \"message\": \"string\",\n  \"license_Data\": [\n    {\n      \"entity\": \"string\",\n      \"certOrgId\": \"string\",\n      \"licenseNumber\": \"string\",\n      \"licenseType\": \"string\",\n      \"issuedTo\": \"string\",\n      \"certificationTitle\": \"string\",\n      \"firstName\": \"string\",\n      \"middleName\": \"string\",\n      \"lastName\": \"string\",\n      \"companyName\": \"string\",\n      \"eMail\": \"string\",\n      \"phone\": \"string\",\n      \"address\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"country\": \"string\",\n      \"zip\": \"string\"\n    },\n    {\n      \"entity\": \"string\",\n      \"certOrgId\": \"string\",\n      \"licenseNumber\": \"string\",\n      \"licenseType\": \"string\",\n      \"issuedTo\": \"string\",\n      \"certificationTitle\": \"string\",\n      \"firstName\": \"string\",\n      \"middleName\": \"string\",\n      \"lastName\": \"string\",\n      \"companyName\": \"string\",\n      \"eMail\": \"string\",\n      \"phone\": \"string\",\n      \"address\": \"string\",\n      \"city\": \"string\",\n      \"state\": \"string\",\n      \"country\": \"string\",\n      \"zip\": \"string\"\n    }\n  ]\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"searchText\": \"string\",\n  \"maxReturn\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/discoverLicenseByText",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "discoverLicenseByText"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "discoverLicenseData",
+          "item": [
+            {
+              "name": "The discovery endpoint to determine a list of available Certification Titles for a State to be discovered.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "pm.test(\"Validate expected contractor types exist\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    const expectedValues = [\r",
+                      "        \"A General Engineering\",\r",
+                      "        \"B General Residential Contractor\",\r",
+                      "        \"B-1 General Commercial Contractor\",\r",
+                      "        \"B-2 General Small Commercial Contracting\",\r",
+                      "        \"B-2 General Small Commercial Contractor\",\r",
+                      "        \"B-3 General Remodeling and Repair Contractor\",\r",
+                      "        \"B-4 General Residential Engineering Contractor\",\r",
+                      "        \"B-5 General Swimming Pool Contractor\",\r",
+                      "        \"B-6 General Swimming Pool Contractor Including Solar\",\r",
+                      "        \"B-6 General Swimming Pool Contractor, Including Solar\",\r",
+                      "        \"General Commercial\",\r",
+                      "        \"General Dual\",\r",
+                      "        \"General Residential\"\r",
+                      "    ];\r",
+                      "\r",
+                      "    pm.expect(response).to.include.members(expectedValues);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"keyword\": \"general\",\n  \"stateAbbr\": \"AZ\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/discoverLicenseData",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "discoverLicenseData"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"keyword\": \"string\",\n  \"stateAbbr\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/discoverLicenseData",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "discoverLicenseData"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  \"string\",\n  \"string\"\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"keyword\": \"string\",\n  \"stateAbbr\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/discoverLicenseData",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "discoverLicenseData"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "exclusionsGet",
+          "item": [
+            {
+              "name": "Retrieve any exclusion reviews needed for a verification.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 415492\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/exclusionsGet",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exclusionsGet"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 9218\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exclusionsGet",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exclusionsGet"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"id\": \"string\",\n    \"requestId\": \"string\",\n    \"recipientName\": \"string\",\n    \"companyName\": \"string\",\n    \"effectiveDate\": \"string\",\n    \"reason\": \"string\",\n    \"entityType\": \"string\",\n    \"initiatedBy\": \"string\",\n    \"suspensionPeriod\": \"string\",\n    \"customerEmail\": \"string\",\n    \"providerName\": \"string\",\n    \"requestName\": \"string\",\n    \"address\": \"string\",\n    \"city\": \"string\",\n    \"state\": \"string\",\n    \"zip\": \"string\",\n    \"aka\": \"string\",\n    \"npi\": \"string\",\n    \"license\": \"string\",\n    \"reviewStatus\": \"string\",\n    \"documentLinks\": \"string\",\n    \"sam\": \"string\",\n    \"cage\": \"string\",\n    \"duns\": \"string\",\n    \"ctCode\": \"string\"\n  },\n  {\n    \"id\": \"string\",\n    \"requestId\": \"string\",\n    \"recipientName\": \"string\",\n    \"companyName\": \"string\",\n    \"effectiveDate\": \"string\",\n    \"reason\": \"string\",\n    \"entityType\": \"string\",\n    \"initiatedBy\": \"string\",\n    \"suspensionPeriod\": \"string\",\n    \"customerEmail\": \"string\",\n    \"providerName\": \"string\",\n    \"requestName\": \"string\",\n    \"address\": \"string\",\n    \"city\": \"string\",\n    \"state\": \"string\",\n    \"zip\": \"string\",\n    \"aka\": \"string\",\n    \"npi\": \"string\",\n    \"license\": \"string\",\n    \"reviewStatus\": \"string\",\n    \"documentLinks\": \"string\",\n    \"sam\": \"string\",\n    \"cage\": \"string\",\n    \"duns\": \"string\",\n    \"ctCode\": \"string\"\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"request_ID\": 9218\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exclusionsGet",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exclusionsGet"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "exclusionUpdate",
+          "item": [
+            {
+              "name": "Updates the Status of an Exclusion associated with a verification.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"exclusionId\": 0,\n  \"request_ID\": 176279,\n  \"status\": 3,\n  \"statusBy\": \"bob\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/exclusionUpdate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "exclusionUpdate"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"exclusionId\": 7418,\n  \"request_ID\": 3319,\n  \"status\": 2245,\n  \"statusBy\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exclusionUpdate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exclusionUpdate"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"exclusionId\": 7418,\n  \"request_ID\": 3319,\n  \"status\": 2245,\n  \"statusBy\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/exclusionUpdate",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "exclusionUpdate"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "addWebHook",
+          "item": [
+            {
+              "name": "Add a webhook endpoint",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"hookUrl\": \"http://test-data.atlascertified.io/api/receiveWebHook\",\n  \"contentType\": \"json\",\n  \"apiKey\": \"string\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/addWebHook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "addWebHook"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"hookUrl\": \"string\",\n  \"contentType\": \"string\",\n  \"apiKey\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/addWebHook",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "addWebHook"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": 9729,\n  \"hookUrl\": \"string\"\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"hookUrl\": \"string\",\n  \"contentType\": \"string\",\n  \"apiKey\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/addWebHook",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "addWebHook"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "getWebHooks",
+          "item": [
+            {
+              "name": "Get all the web hooks for an API Key.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Validate webhook list response\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    // Check response is an array\r",
+                      "    pm.expect(response).to.be.an(\"array\");\r",
+                      "    pm.expect(response.length).to.be.above(0);\r",
+                      "\r",
+                      "    response.forEach((item, index) => {\r",
+                      "        // Property existence\r",
+                      "        pm.expect(item, `Item ${index} missing id`).to.have.property(\"id\");\r",
+                      "        pm.expect(item, `Item ${index} missing hookUrl`).to.have.property(\"hookUrl\");\r",
+                      "\r",
+                      "        // Data type validation\r",
+                      "        pm.expect(item.id).to.be.a(\"number\");\r",
+                      "        pm.expect(item.hookUrl).to.be.a(\"string\");\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}}\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/getWebHooks",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "getWebHooks"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/getWebHooks",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "getWebHooks"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"id\": 8570,\n    \"hookUrl\": \"string\"\n  },\n  {\n    \"id\": 1331,\n    \"hookUrl\": \"string\"\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/getWebHooks",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "getWebHooks"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "deleteWebHook",
+          "item": [
+            {
+              "name": "Delete a webhook endpoint",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"hookID\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/deleteWebHook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "deleteWebHook"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"hookID\": 8406\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/deleteWebHook",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "deleteWebHook"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "true"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"hookID\": 8406\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/deleteWebHook",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "deleteWebHook"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationStates",
+          "item": [
+            {
+              "name": "List of all States for USA State License that have a Certifying Orgs.  (V5 Obsolete,please use the certOrgStates endpoint.)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Validate states response structure\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    // Response should be an array\r",
+                      "    pm.expect(response).to.be.an(\"array\");\r",
+                      "    pm.expect(response.length).to.be.above(0);\r",
+                      "\r",
+                      "    response.forEach((item, index) => {\r",
+                      "        pm.expect(item, `Item ${index} missing name`).to.have.property(\"name\");\r",
+                      "        pm.expect(item, `Item ${index} missing verification_State_ID`)\r",
+                      "            .to.have.property(\"verification_State_ID\");\r",
+                      "\r",
+                      "        pm.expect(item.name).to.be.a(\"string\");\r",
+                      "        pm.expect(item.verification_State_ID).to.be.a(\"number\");\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}}\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationStates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationStates"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationStates",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationStates"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"verification_State_ID\": 9675\n  },\n  {\n    \"name\": \"string\",\n    \"verification_State_ID\": 627\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationStates",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationStates"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationFieldsByProvider",
+          "item": [
+            {
+              "name": "List of all input fields for a Certifying Org.  (V5 Obsolete, please use the certOrgsFields endpoint.)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Validate license fields response structure\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    // Response should be an array\r",
+                      "    pm.expect(response).to.be.an(\"array\");\r",
+                      "    pm.expect(response.length).to.be.above(0);\r",
+                      "\r",
+                      "    response.forEach((item, index) => {\r",
+                      "        // Required properties\r",
+                      "        pm.expect(item, `Item ${index} missing name`).to.have.property(\"name\");\r",
+                      "        pm.expect(item, `Item ${index} missing options`).to.have.property(\"options\");\r",
+                      "        pm.expect(item, `Item ${index} missing hasOptions`).to.have.property(\"hasOptions\");\r",
+                      "\r",
+                      "        // Data types\r",
+                      "        pm.expect(item.name).to.be.a(\"string\");\r",
+                      "        pm.expect(item.options).to.be.an(\"array\");\r",
+                      "        pm.expect(item.hasOptions).to.be.a(\"boolean\");\r",
+                      "\r",
+                      "        // Conditional validation\r",
+                      "        if (item.hasOptions === false) {\r",
+                      "            pm.expect(\r",
+                      "                item.options.length,\r",
+                      "                `Options should be empty for ${item.name}`\r",
+                      "            ).to.eql(0);\r",
+                      "        }\r",
+                      "\r",
+                      "        if (item.hasOptions === true) {\r",
+                      "            pm.expect(\r",
+                      "                item.options.length,\r",
+                      "                `Options should not be empty for ${item.name}`\r",
+                      "            ).to.be.above(0);\r",
+                      "\r",
+                      "            // Validate options structure\r",
+                      "            item.options.forEach((opt, optIndex) => {\r",
+                      "                pm.expect(opt, `Option ${optIndex} missing name`)\r",
+                      "                    .to.have.property(\"name\");\r",
+                      "                pm.expect(opt, `Option ${optIndex} missing value`)\r",
+                      "                    .to.have.property(\"value\");\r",
+                      "\r",
+                      "                pm.expect(opt.name).to.be.a(\"string\");\r",
+                      "                pm.expect(opt.value).to.be.a(\"string\");\r",
+                      "            });\r",
+                      "        }\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"verification_Provider_ID\": \"cbfe130d-8301-434f-ba73-b27054ee5693\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationFieldsByProvider",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationFieldsByProvider"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"verification_Provider_ID\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationFieldsByProvider",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationFieldsByProvider"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"options\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      },\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      }\n    ],\n    \"hasOptions\": true\n  },\n  {\n    \"name\": \"string\",\n    \"options\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      },\n      {\n        \"name\": \"string\",\n        \"value\": \"string\"\n      }\n    ],\n    \"hasOptions\": true\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"verification_Provider_ID\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationFieldsByProvider",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationFieldsByProvider"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verificationProviders",
+          "item": [
+            {
+              "name": "Get a List of all Certifying Orgs for a state.  (V5 Obsolete, please use the certOrgsbyState endpoint.)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Validate verification providers response\", function () {\r",
+                      "    const response = pm.response.json();\r",
+                      "\r",
+                      "    // Response should be an array\r",
+                      "    pm.expect(response).to.be.an(\"array\");\r",
+                      "    pm.expect(response.length).to.be.above(0);\r",
+                      "\r",
+                      "    response.forEach((item, index) => {\r",
+                      "        // Property existence\r",
+                      "        pm.expect(item, `Item ${index} missing name`)\r",
+                      "            .to.have.property(\"name\");\r",
+                      "        pm.expect(item, `Item ${index} missing state_ID`)\r",
+                      "            .to.have.property(\"state_ID\");\r",
+                      "        pm.expect(item, `Item ${index} missing verification_Provider_ID`)\r",
+                      "            .to.have.property(\"verification_Provider_ID\");\r",
+                      "        pm.expect(item, `Item ${index} missing isHealthy`)\r",
+                      "            .to.have.property(\"isHealthy\");\r",
+                      "\r",
+                      "        // Data type validation\r",
+                      "        pm.expect(item.name).to.be.a(\"string\");\r",
+                      "        pm.expect(item.state_ID).to.be.a(\"number\");\r",
+                      "        pm.expect(item.verification_Provider_ID).to.be.a(\"string\");\r",
+                      "        pm.expect(item.isHealthy).to.be.a(\"boolean\");\r",
+                      "\r",
+                      "        // Arizona specific validation\r",
+                      "        pm.expect(item.state_ID, \"state_ID should be Arizona (3)\")\r",
+                      "            .to.eql(3);\r",
+                      "\r",
+                      "        // Health check\r",
+                      "        pm.expect(item.isHealthy, \"Provider is not healthy\")\r",
+                      "            .to.eql(true);\r",
+                      "\r",
+                      "        // UUID format validation\r",
+                      "        pm.expect(item.verification_Provider_ID).to.match(\r",
+                      "            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i\r",
+                      "        );\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"verification_State_ID\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verificationProviders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verificationProviders"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"verification_State_ID\": 9268\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationProviders",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationProviders"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"name\": \"string\",\n    \"state_ID\": 5916,\n    \"verification_Provider_ID\": \"string\",\n    \"isHealthy\": true\n  },\n  {\n    \"name\": \"string\",\n    \"state_ID\": 3994,\n    \"verification_Provider_ID\": \"string\",\n    \"isHealthy\": true\n  }\n]"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"verification_State_ID\": 9268\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verificationProviders",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verificationProviders"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verification",
+          "item": [
+            {
+              "name": "Submit a verification.  (V5 Obsolete, please use the verificationSubmit endpoint.)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Response status code should not be 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(500);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 401\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 400\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response status code should not be 404\", function () {\r",
+                      "    pm.expect(pm.response.code).to.not.equal(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is less than 3000ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"verification_Provider_ID\": \"53974337-0ec3-4dce-9965-16a3ef48588f\",\n  \"client_Request_ID\": \"string\",\n  \"first_Name\": \"karan\",\n  \"middle_Name\": \"s\",\n  \"last_Name\": \"karan\",\n  \"company_Name\": \"string\",\n  \"email\": \"string\",\n  \"license_Number\": \"string\",\n  \"license_Type\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"providerState\": \"string\",\n  \"npi\": \"string\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/verification",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "verification"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"verification_Provider_ID\": \"string\",\n  \"client_Request_ID\": \"string\",\n  \"first_Name\": \"string\",\n  \"middle_Name\": \"string\",\n  \"last_Name\": \"string\",\n  \"company_Name\": \"string\",\n  \"email\": \"string\",\n  \"license_Number\": \"string\",\n  \"license_Type\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"providerState\": \"string\",\n  \"npi\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verification",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verification"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"request_ID\": 5664,\n  \"client_Request_ID\": \"string\",\n  \"response_msg\": \"string\"\n}"
+                },
+                {
+                  "name": "Bad Request",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"api_key\": \"string\",\n  \"verification_Provider_ID\": \"string\",\n  \"client_Request_ID\": \"string\",\n  \"first_Name\": \"string\",\n  \"middle_Name\": \"string\",\n  \"last_Name\": \"string\",\n  \"company_Name\": \"string\",\n  \"email\": \"string\",\n  \"license_Number\": \"string\",\n  \"license_Type\": \"string\",\n  \"city\": \"string\",\n  \"state\": \"string\",\n  \"country\": \"string\",\n  \"providerState\": \"string\",\n  \"npi\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/verification",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "verification"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"errorMessage\": \"string\"\n}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "API_KEY",
+      "value": ""
+    },
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "baseUrl1",
+      "value": ""
+    }
+  ]
+}
