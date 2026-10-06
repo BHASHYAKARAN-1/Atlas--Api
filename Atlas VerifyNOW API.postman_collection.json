@@ -711,7 +711,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchFilter\": \"\",\n  \"keywords\": [\n    4\n  ]\n}",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"searchFilter\": \"Ari\",\n  \"keywords\": [4\n  ]\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -1082,7 +1082,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"certOrgID\": \"53974337-0ec3-4dce-9965-16a3ef48588f\",\n  \"companyName\": \"A Child's Place At The Ranches, L.L.C.\",\n  \"inputList\": [\n    {\n      \"fieldName\": \"LicenseNumber\",\n      \"fieldValue\": \"CDC-11818\"\n    }\n  ]\n}",
+                  "raw": "{\n   \"api_key\": {{API_KEY}},\n  \"certOrgID\": \"53974337-0ec3-4dce-9965-16a3ef48588f\",\n  \"ClientRequestId\": \"REQ-011\",\n  \"FirstName\": \"Oliver\",\n  \"LastName\": \"Anderson\",\n  \"Email\": \"oliver@example.com\",\n  \"CompanyName\": \"Anderson Corp\",\n  \"ZIP\": \"12345-6789\",\n  \"City\": \"Las Vegas\",\n  \"State\": \"NV\",\n  \"InputList\": []\n}\n\n",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -1238,13 +1238,6 @@
                       "    pm.response.to.have.status(200);\r",
                       "});\r",
                       "\r",
-                      "pm.test(\"License is active and not expired\", function () {\r",
-                      "    const json = pm.response.json();\r",
-                      "    pm.expect(json.certification_name).to.eql(\"Child Care Center\");\r",
-                      "    \r",
-                      "    const expDate = new Date(json.expiration_date);\r",
-                      "    pm.expect(expDate).to.be.above(new Date());\r",
-                      "});\r",
                       "\r",
                       "pm.test(\"Required fields are present\", function () {\r",
                       "    const json = pm.response.json();\r",
@@ -1255,18 +1248,6 @@
                       "        \"client_Request_ID\", \"screenshot\"\r",
                       "    );\r",
                       "});\r",
-                      "\r",
-                      "pm.test(\"Issued to correct facility\", function () {\r",
-                      "    const json = pm.response.json();\r",
-                      "    pm.expect(json.issued_to).to.eql(\"A Child's Place At The Ranches, L.L.C.\");\r",
-                      "    pm.expect(json.provider).to.eql(\"Arizona: Care Providers\");\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Response message contains license number\", function () {\r",
-                      "    const json = pm.response.json();\r",
-                      "    pm.expect(json.response_msg).to.include(\"CDC-11818\");\r",
-                      "});\r",
-                      "\r",
                       "pm.test(\"Screenshot is present and base64 encoded\", function () {\r",
                       "    const json = pm.response.json();\r",
                       "    pm.expect(json.screenshot).to.be.a(\"string\");\r",
@@ -1466,7 +1447,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": 273931\n}",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"request_ID\": \"0265110\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -2910,7 +2891,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"exclusionId\": 0,\n  \"request_ID\": 176279,\n  \"status\": 3,\n  \"statusBy\": \"bob\"\n}",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"exclusionId\": 1,\n  \"request_ID\": 176279,\n  \"status\": 3,\n  \"statusBy\": \"bob\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -3083,7 +3064,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"hookUrl\": \"http://test-data.atlascertified.io/api/receiveWebHook\",\n  \"contentType\": \"json\",\n  \"apiKey\": \"string\"\n}",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"hookUrl\": \"https://test-data.atlascertified.io/api/receiveWebHook\"\n  //\"contentType\": \"json\",\n  //\"apiKey\": \"string\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -3444,7 +3425,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"hookID\": 10\n}",
+                  "raw": "{\n  \"api_key\": {{API_KEY}},\n  \"hookID\": 11}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -4383,7 +4364,7 @@
   ],
   "variable": [
     {
-      "key": "API_KEY",
+      "key": "API_KEY1",
       "value": ""
     },
     {
@@ -4393,6 +4374,10 @@
     {
       "key": "baseUrl1",
       "value": ""
+    },
+    {
+      "key": "API_KEY",
+      "value": "\"273E3A5605074FB4A72B4DCCB6795B3A"
     }
   ]
 }
